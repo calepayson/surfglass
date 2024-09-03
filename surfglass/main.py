@@ -1,6 +1,20 @@
-from dotenv import load_dotenv
-import os
+class SurfBreakLocation:
+    """
+    Class to represent the location of a surf break
 
-def get_api_key():
-    load_dotenv()
-    return os.getenv('API_KEY')
+    Attributes:
+        name (str): The name of the break
+        coordinates (Coordinates): The geographical coordinates of the break
+    """
+    def __init__(self, name: str, coordinates: Coordinates):
+        """
+        Initialize a new SurfBreakLocation object
+
+        Args:
+            name (str): The name to set
+            coordinates (Coordinates): The coordinates to set
+        """
+        self.name = name
+        self.coordinates = coordinates
+
+
