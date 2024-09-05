@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS locations (
 ADD_LOCATION = "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, ?);"
 GET_ALL_LOCATIONS = "SELECT * FROM locations;"
 GET_LOCATION_BY_NAME = "SELECT * FROM locations WHERE name = ?;"
+DELETE_LOCATION_BY_NAME = "DELETE FROM locations WHERE name = ?;"
 
 CREATE_UPDATES_TABLE = """
 CREATE TABLE IF NOT EXISTS updates (
@@ -93,3 +94,8 @@ def get_location_by_name(connection, name):
     """Get a location that matches the provided name"""
     with connection:
         return connection.execute(GET_LOCATION_BY_NAME, (name,)).fetchall()
+
+def delete_location_by_name(connection, name):
+    """Delete a location that matches the provided name"""
+    with connection:
+        connection.execute(DELETE_LOCATION_BY_NAME, (name,))

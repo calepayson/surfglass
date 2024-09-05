@@ -176,3 +176,26 @@ def test_get_location_by_name(tmp_path):
     assert returned_location[0][1] == name, f"Expected name: {name}, Got: {returned_location[0][1]}"
     assert returned_location[0][2] == latitude, f"Expected latitude: {name}, Got: {returned_location[0][2]}"
     assert returned_location[0][3] == longitude, f"Expected longitude: {name}, Got: {returned_location[0][3]}"
+
+def test_delete_location_by_name(tmp_path):
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_locations_table(connection)
+
+    # Mock locations and add them to the database
+    for location in LOCATIONS_TEST_DATA:
+        name, latitude, longitude = location
+        Database.add_location(connection, name, latitude, longitude)
+
+    # Delete a location
+    target_name, target_latitude, target_longitude = LOCATIONS_TEST_DATA[0]
+    Database.delete_location_by_name(connection, target_name)
+
+    # Grab all the remaining locations
+    locations = Database.get_all_locations(connection)
+
+    # Check that the deleted location is not in them
+    for location in locations:
+        assert target_name != location[1], f"Deleted: {target_name} but found: {location[1]}"
+        assert target_latitude != location[2], f"Deleted: {target_latitude} but found: {location[2]}"
+        assert target_longitude != location[3], f"Deleted: {target_longitude} but found: {location[3]}"
