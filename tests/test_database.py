@@ -2,8 +2,25 @@ import pytest
 import sqlite3
 import surfglass.database as Database
 
+LOCATIONS_TABLE_EXISTS = """
+SELECT name 
+FROM sqlite_master 
+WHERE type='table' AND name='locations';
+"""
 LOCATIONS_EXPECTED_COLUMNS = ['id', 'name', 'latitude', 'longitude']
+
+UPDATES_TABLE_EXISTS = """
+SELECT name 
+FROM sqlite_master 
+WHERE type='table' AND name='updates';
+"""
 UPDATES_EXPECTED_COLUMNS = ['id', 'time']
+
+FORECASTS_TABLE_EXISTS = """
+SELECT name 
+FROM sqlite_master 
+WHERE type='table' AND name='forecasts';
+"""
 FORECASTS_EXPECTED_COLUMNS = [
     'id', 'location_id', 'time', 'tide', 'air_temp', 'cloud_cover', 
     'current_direction', 'current_speed', 'gust', 'swell_direction', 
@@ -29,11 +46,7 @@ def test_create_locations_table(tmp_path):
     Database.create_locations_table(connection)
 
     # Check if the table exists
-    result = connection.execute("""
-        SELECT name 
-        FROM sqlite_master 
-        WHERE type='table' AND name='locations';
-    """)
+    result = connection.execute(LOCATIONS_TABLE_EXISTS)
     assert result.fetchone() is not None, "locations table not found"
 
     # Check if the table has the right schema
@@ -50,11 +63,7 @@ def test_create_updates_table(tmp_path):
     Database.create_updates_table(connection)
 
     # Check if the table exists
-    result = connection.execute("""
-        SELECT name
-        FROM sqlite_master
-        WHERE type='table' AND name='updates';
-    """)
+    result = connection.execute(UPDATES_TABLE_EXISTS)
     assert result.fetchone() is not None, "updates table not found"
 
     # Check if the table has the right schema
@@ -72,11 +81,7 @@ def test_create_forecasts_table(tmp_path):
     Database.create_forecasts_table(connection)
 
     # Check if the table exists
-    result = connection.execute("""
-        SELECT name
-        FROM sqlite_master
-        WHERE type='table' AND name='forecasts';
-    """)
+    result = connection.execute(FORECASTS_TABLE_EXISTS)
     assert result.fetchone is not None, "forecasts table not found"
 
     # Check if the table has the right schema
@@ -85,3 +90,16 @@ def test_create_forecasts_table(tmp_path):
     for column in FORECASTS_EXPECTED_COLUMNS:
         assert column in columns, f"The forecasts table is missing a column: {column}"
 
+def test_create_all_tables(tmp_path):
+    """Test that all tables are successfully created"""
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_all_tables(connection)
+
+    # Check if all tables exist
+    locations = connection.execute(LOCATIONS_TABLE_EXISTS)
+    assert locations.fetchone is not None, "locations table not found"
+    updates = connection.execute(UPDATES_TABLE_EXISTS)
+    assert updates.fetchone is not None, "updates table not found"
+    forecasts = connection.execute(FORECASTS_TABLE_EXISTS)
+    assert forecasts.fetchone is not None, "forecasts table not found"

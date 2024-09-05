@@ -68,3 +68,8 @@ def create_forecasts_table(connection):
     """Create the forecasts table in the database with the supplied connection"""
     with connection:
         connection.execute(CREATE_FORECASTS_TABLE)
+
+def create_all_tables(connection):
+    create_locations_table(connection)
+    create_updates_table(connection)
+    create_forecasts_table(connection)
