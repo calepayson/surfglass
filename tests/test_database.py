@@ -132,7 +132,25 @@ def test_add_location(tmp_path):
 
     # Check that the location matches the input data
     assert location[0] == name, f"Expected name: {name}, Got: {location[0]}"
-    assert location[1] == latitude, f"Expected name: {latitude}, Got: {location[1]}"
-    assert location[2] == longitude, f"Expected name: {longitude}, Got: {location[2]}"
+    assert location[1] == latitude, f"Expected latitude: {latitude}, Got: {location[1]}"
+    assert location[2] == longitude, f"Expected longitude: {longitude}, Got: {location[2]}"
 
+def test_get_all_locations(tmp_path):
+    """Test that locations can be successfully read"""
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_all_tables(connection)
+
+    # Mock a location and add it to the database
+    name, latitude, longitude = LOCATIONS_TEST_DATA
+    Database.add_location(connection, name, latitude, longitude)
+
+    # Read from the database
+    locations = Database.get_all_locations(connection)
+    returned_name, returned_latitude, returned_longitude = locations[0][1], locations[0][2], locations[0][3]
+
+    # Check that the returned data matches the input data
+    assert returned_name == name, f"Expected name: {name}, Got: {returned_name}"
+    assert returned_latitude == latitude, f"Expected latitude: {latitude}, Got: {returned_latitude}"
+    assert returned_longitude == longitude, f"Expected longitude: {longitude}, Got: {returned_longitude}"
 

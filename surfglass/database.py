@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS locations (
     longitude REAL NOT NULL
 );
 """
+ADD_LOCATION = "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, ?);"
+GET_ALL_LOCATIONS = "SELECT * FROM locations;"
 
 CREATE_UPDATES_TABLE = """
 CREATE TABLE IF NOT EXISTS updates (
@@ -48,7 +50,6 @@ CREATE TABLE IF NOT EXISTS forecasts (
 );
 """
 
-ADD_LOCATION = "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, ?);"
 
 def create_connection(db_file):
     """Create a database connection to SQLite database specified by db_file"""
@@ -72,10 +73,17 @@ def create_forecasts_table(connection):
         connection.execute(CREATE_FORECASTS_TABLE)
 
 def create_all_tables(connection):
+    """Create each table if it does not already exist"""
     create_locations_table(connection)
     create_updates_table(connection)
     create_forecasts_table(connection)
 
 def add_location(connection, name, latitude, longitude):
+    """Add a location to the locations database"""
     with connection:
         connection.execute(ADD_LOCATION, (name, latitude, longitude))
+
+def get_all_locations(connection):
+    """Get all the locations from the locations database"""
+    with connection:
+        return connection.execute(GET_ALL_LOCATIONS).fetchall()
