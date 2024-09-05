@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS forecasts (
 );
 """
 
+ADD_LOCATION = "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, ?);"
+
 def create_connection(db_file):
     """Create a database connection to SQLite database specified by db_file"""
     connection = sqlite3.connect(db_file)
@@ -73,3 +75,7 @@ def create_all_tables(connection):
     create_locations_table(connection)
     create_updates_table(connection)
     create_forecasts_table(connection)
+
+def add_location(connection, name, latitude, longitude):
+    with connection:
+        connection.execute(ADD_LOCATION, (name, latitude, longitude))

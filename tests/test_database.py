@@ -30,6 +30,12 @@ FORECASTS_EXPECTED_COLUMNS = [
     'wind_wave_height', 'wind_wave_period', 'wind_direction', 
     'wind_direction1000hpa', 'wind_speed', 'wind_speed1000hpa'
 ]
+LOCATIONS_TEST_DATA = ("Rodeo Beach", 37.83, -122.54)
+LOCATIONS_DATA_QUERY = """
+SELECT name, latitude, longitude
+FROM locations
+WHERE name = ?;
+"""
 
 def test_create_connection(tmp_path):
     """Test that create connection successfully establishes a connection to the database"""
@@ -103,3 +109,30 @@ def test_create_all_tables(tmp_path):
     assert updates.fetchone is not None, "updates table not found"
     forecasts = connection.execute(FORECASTS_TABLE_EXISTS)
     assert forecasts.fetchone is not None, "forecasts table not found"
+
+def test_add_location(tmp_path):
+    """Test that locations can be successfully added"""
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_all_tables(connection)
+
+    # Mock a location
+    name, latitude, longitude = LOCATIONS_TEST_DATA
+
+    # Add the location to the database
+    Database.add_location(connection, name, latitude, longitude)
+
+    # Retrieve the location
+    cursor = connection.cursor()
+    cursor.execute(LOCATIONS_DATA_QUERY, (name,))
+    location = cursor.fetchone()
+
+    # Check that the location was found
+    assert location is not None
+
+    # Check that the location matches the input data
+    assert location[0] == name, f"Expected name: {name}, Got: {location[0]}"
+    assert location[1] == latitude, f"Expected name: {latitude}, Got: {location[1]}"
+    assert location[2] == longitude, f"Expected name: {longitude}, Got: {location[2]}"
+
+
