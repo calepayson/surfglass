@@ -12,6 +12,11 @@ ADD_LOCATION = "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, 
 GET_ALL_LOCATIONS = "SELECT * FROM locations;"
 GET_LOCATION_BY_NAME = "SELECT * FROM locations WHERE name = ?;"
 DELETE_LOCATION_BY_NAME = "DELETE FROM locations WHERE name = ?;"
+UPDATE_LOCATION_BY_NAME = """
+UPDATE locations
+SET latitude = ?, longitude = ?
+WHERE name = ?;
+"""
 
 CREATE_UPDATES_TABLE = """
 CREATE TABLE IF NOT EXISTS updates (
@@ -99,3 +104,8 @@ def delete_location_by_name(connection, name):
     """Delete a location that matches the provided name"""
     with connection:
         connection.execute(DELETE_LOCATION_BY_NAME, (name,))
+
+def update_location_by_name(connection, name, latitude, longitude):
+    """Update a location that matches the provided name with the provided lat/long"""
+    with connection:
+        connection.execute(UPDATE_LOCATION_BY_NAME, (latitude, longitude, name))

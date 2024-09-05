@@ -199,3 +199,26 @@ def test_delete_location_by_name(tmp_path):
         assert target_name != location[1], f"Deleted: {target_name} but found: {location[1]}"
         assert target_latitude != location[2], f"Deleted: {target_latitude} but found: {location[2]}"
         assert target_longitude != location[3], f"Deleted: {target_longitude} but found: {location[3]}"
+
+def test_update_location_by_name(tmp_path):
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_locations_table(connection)
+
+    # Mock locations and add them to the database
+    for location in LOCATIONS_TEST_DATA:
+        name, latitude, longitude = location
+        Database.add_location(connection, name, latitude, longitude)
+
+    # Update a location
+    name = LOCATIONS_TEST_DATA[0][0]
+    new_latitude, new_longitude = 42.0, 69.0
+    Database.update_location_by_name(connection, name, new_latitude, new_longitude)
+
+    # Lookup location
+    location = Database.get_location_by_name(connection, name)[0]
+
+    # Check that the data was properly updated
+    assert location[1] == name, "Name not found"
+    assert location[2] == new_latitude, f"Expected: {new_latitude}, Got: {location[2]}"
+    assert location[3] == new_longitude, f"Expected: {new_longitude}, Got: {location[3]}"
