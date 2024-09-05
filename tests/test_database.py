@@ -30,7 +30,11 @@ FORECASTS_EXPECTED_COLUMNS = [
     'wind_wave_height', 'wind_wave_period', 'wind_direction', 
     'wind_direction1000hpa', 'wind_speed', 'wind_speed1000hpa'
 ]
-LOCATIONS_TEST_DATA = ("Rodeo Beach", 37.83, -122.54)
+
+LOCATIONS_TEST_DATA = [
+    ("Rodeo Beach", 37.83, -122.54),
+    ("Ocean Beach", 37.77, -122.51)
+]
 LOCATIONS_DATA_QUERY = """
 SELECT name, latitude, longitude
 FROM locations
@@ -117,7 +121,7 @@ def test_add_location(tmp_path):
     Database.create_all_tables(connection)
 
     # Mock a location
-    name, latitude, longitude = LOCATIONS_TEST_DATA
+    name, latitude, longitude = LOCATIONS_TEST_DATA[0]
 
     # Add the location to the database
     Database.add_location(connection, name, latitude, longitude)
@@ -139,18 +143,36 @@ def test_get_all_locations(tmp_path):
     """Test that locations can be successfully read"""
     db_file = tmp_path / "test.db"
     connection = Database.create_connection(str(db_file))
-    Database.create_all_tables(connection)
+    Database.create_locations_table(connection)
 
-    # Mock a location and add it to the database
-    name, latitude, longitude = LOCATIONS_TEST_DATA
-    Database.add_location(connection, name, latitude, longitude)
+    # Mock locations and add them to the database
+    for location in LOCATIONS_TEST_DATA:
+        name, latitude, longitude = location
+        Database.add_location(connection, name, latitude, longitude)
 
-    # Read from the database
+    # Check that the database is read correctly
     locations = Database.get_all_locations(connection)
-    returned_name, returned_latitude, returned_longitude = locations[0][1], locations[0][2], locations[0][3]
+    assert len(locations) == len(LOCATIONS_TEST_DATA), "Number of locations retrieved does not match expected"
 
-    # Check that the returned data matches the input data
-    assert returned_name == name, f"Expected name: {name}, Got: {returned_name}"
-    assert returned_latitude == latitude, f"Expected latitude: {latitude}, Got: {returned_latitude}"
-    assert returned_longitude == longitude, f"Expected longitude: {longitude}, Got: {returned_longitude}"
+    # Check each retrieved location against the test data
+    for location in locations:
+        assert (location[1], location[2], location[3]) in LOCATIONS_TEST_DATA, f"({locations[1]}, {locations[2]}, {locations[3]}) not found in test data"
 
+def test_get_location_by_name(tmp_path):
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_locations_table(connection)
+
+    # Mock locations and add them to the database
+    for location in LOCATIONS_TEST_DATA:
+        name, latitude, longitude = location
+        Database.add_location(connection, name, latitude, longitude)
+
+    # Grab the location
+    name, latitude, longitude = LOCATIONS_TEST_DATA[0]
+    returned_location = Database.get_location_by_name(connection, name)
+
+    # Check that the retrieved location matches the test data
+    assert returned_location[0][1] == name, f"Expected name: {name}, Got: {returned_location[0][1]}"
+    assert returned_location[0][2] == latitude, f"Expected latitude: {name}, Got: {returned_location[0][2]}"
+    assert returned_location[0][3] == longitude, f"Expected longitude: {name}, Got: {returned_location[0][3]}"

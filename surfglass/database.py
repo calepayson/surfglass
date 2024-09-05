@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS locations (
 """
 ADD_LOCATION = "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, ?);"
 GET_ALL_LOCATIONS = "SELECT * FROM locations;"
+GET_LOCATION_BY_NAME = "SELECT * FROM locations WHERE name = ?;"
 
 CREATE_UPDATES_TABLE = """
 CREATE TABLE IF NOT EXISTS updates (
@@ -87,3 +88,8 @@ def get_all_locations(connection):
     """Get all the locations from the locations database"""
     with connection:
         return connection.execute(GET_ALL_LOCATIONS).fetchall()
+
+def get_location_by_name(connection, name):
+    """Get a location that matches the provided name"""
+    with connection:
+        return connection.execute(GET_LOCATION_BY_NAME, (name,)).fetchall()
