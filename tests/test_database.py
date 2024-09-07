@@ -41,6 +41,16 @@ FROM locations
 WHERE name = ?;
 """
 
+UPDATES_TEST_DATA = [
+    "2024-09-06",
+    "2024-09-07"
+]
+UPDATES_DATA_QUERY = """
+SELECT time
+FROM updates
+WHERE time = ?;
+"""
+
 def test_create_connection(tmp_path):
     """Test that create connection successfully establishes a connection to the database"""
     db_file = tmp_path / "test.db"
@@ -222,3 +232,26 @@ def test_update_location_by_name(tmp_path):
     assert location[1] == name, "Name not found"
     assert location[2] == new_latitude, f"Expected: {new_latitude}, Got: {location[2]}"
     assert location[3] == new_longitude, f"Expected: {new_longitude}, Got: {location[3]}"
+
+def test_add_update(tmp_path):
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_updates_table(connection)
+
+    # Mock updates and add them to the database
+    for update in UPDATES_TEST_DATA:
+        time = update
+        Database.add_update(connection, time)
+
+    # Retrieve the update
+    expected_time = UPDATES_TEST_DATA[0]
+    cursor = connection.cursor()
+    cursor.execute(UPDATES_DATA_QUERY, (expected_time,))
+    update = cursor.fetchone()
+
+    # Check that the location was found
+    assert update is not None
+
+    # Check that the location matches the input data
+    assert update[0] == expected_time, f"Expected time: {expected_time}, Got: {update[0]}"
+

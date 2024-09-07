@@ -24,6 +24,13 @@ CREATE TABLE IF NOT EXISTS updates (
         time TEXT NOT NULL
         );
 """
+ADD_UPDATE = "INSERT INTO updates (time) VALUES (?);"
+GET_LATEST_UPDATE = """
+SELECT *
+FROM updates
+ORDER BY id DESC
+LIMIT 1;
+"""
 
 CREATE_FORECASTS_TABLE = """
 CREATE TABLE IF NOT EXISTS forecasts (
@@ -57,6 +64,9 @@ CREATE TABLE IF NOT EXISTS forecasts (
 );
 """
 
+###############################
+# DATABASE AND TABLE CREATION #
+###############################
 
 def create_connection(db_file):
     """Create a database connection to SQLite database specified by db_file"""
@@ -85,13 +95,17 @@ def create_all_tables(connection):
     create_updates_table(connection)
     create_forecasts_table(connection)
 
+#######################
+# LOCATION OPERATIONS #
+#######################
+
 def add_location(connection, name, latitude, longitude):
-    """Add a location to the locations database"""
+    """Add a location to the locations table"""
     with connection:
         connection.execute(ADD_LOCATION, (name, latitude, longitude))
 
 def get_all_locations(connection):
-    """Get all the locations from the locations database"""
+    """Get all the locations from the locations table"""
     with connection:
         return connection.execute(GET_ALL_LOCATIONS).fetchall()
 
@@ -109,3 +123,12 @@ def update_location_by_name(connection, name, latitude, longitude):
     """Update a location that matches the provided name with the provided lat/long"""
     with connection:
         connection.execute(UPDATE_LOCATION_BY_NAME, (latitude, longitude, name))
+
+#####################
+# UPDATE OPERATIONS # 
+#####################
+
+def add_update(connection, time):
+    """Add an update to the updates table"""
+    with connection:
+        connection.execute(ADD_UPDATE, (time,))
