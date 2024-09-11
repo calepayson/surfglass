@@ -51,6 +51,35 @@ FROM updates
 WHERE time = ?;
 """
 
+FORECASTS_TEST_DATA = (
+    1,  # location_id
+    1,  # update_id
+    "2024-09-06 12:00:00",  # time
+    2.5,  # tide
+    18.0,  # air_temp
+    75.0,  # cloud_cover
+    135,  # current_direction
+    1.5,  # current_speed
+    25.0,  # gust
+    220,  # swell_direction
+    1.8,  # swell_height
+    12,  # swell_period
+    190,  # secondary_swell_direction
+    1.2,  # secondary_swell_height
+    10,  # secondary_swell_period
+    10.0,  # visibility
+    200,  # wave_direction
+    1.5,  # wave_height
+    8,  # wave_period
+    180,  # wind_wave_direction
+    1.0,  # wind_wave_height
+    7,  # wind_wave_period
+    180,  # wind_direction
+    170,  # wind_direction1000hpa
+    12.0,  # wind_speed
+    10.0  # wind_speed1000hpa
+)
+
 def test_create_connection(tmp_path):
     """Test that create connection successfully establishes a connection to the database"""
     db_file = tmp_path / "test.db"
@@ -298,34 +327,7 @@ def test_add_forecast(tmp_path):
         Database.add_location(connection, name, latitude, longitude)
 
     # Mock a forecast data entry
-    forecast_data = (
-        1,  # location_id
-        1,  # update_id
-        "2024-09-06 12:00:00",  # time
-        2.5,  # tide
-        18.0,  # air_temp
-        75.0,  # cloud_cover
-        135,  # current_direction
-        1.5,  # current_speed
-        25.0,  # gust
-        220,  # swell_direction
-        1.8,  # swell_height
-        12,  # swell_period
-        190,  # secondary_swell_direction
-        1.2,  # secondary_swell_height
-        10,  # secondary_swell_period
-        10.0,  # visibility
-        200,  # wave_direction
-        1.5,  # wave_height
-        8,  # wave_period
-        180,  # wind_wave_direction
-        1.0,  # wind_wave_height
-        7,  # wind_wave_period
-        180,  # wind_direction
-        170,  # wind_direction1000hpa
-        12.0,  # wind_speed
-        10.0  # wind_speed1000hpa
-    )
+    forecast_data = FORECASTS_TEST_DATA   
 
     # Add the forecast to the database
     Database.add_forecast(connection, *forecast_data)
@@ -341,4 +343,38 @@ def test_add_forecast(tmp_path):
     # Check that each value matches the input data
     for i, value in enumerate(forecast_data):
         assert forecast[i + 1] == value, f"Expected: {value}, Got: {forecast[i + 1]}"
+
+def test_get_forecasts(tmp_path):
+    """Test that forecasts can be successfully retrieved by location_id and update_id"""
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_all_tables(connection)
+    
+    # Mock updates and add them to the database
+    for update in UPDATES_TEST_DATA:
+        time = update
+        Database.add_update(connection, time)
+
+    # Mock locations and add them to the database
+    for location in LOCATIONS_TEST_DATA:
+        name, latitude, longitude = location
+        Database.add_location(connection, name, latitude, longitude)
+
+    # Mock a forecast data entry
+    forecast_data = FORECASTS_TEST_DATA
+
+    # Add the forecast to the database
+    Database.add_forecast(connection, *forecast_data)
+
+    # Retrieve the forecasts using get_forecasts
+    retrieved_forecasts = Database.get_forecasts(connection, FORECASTS_TEST_DATA[0], 
+                                        FORECASTS_TEST_DATA[1])
+
+    # Check that one forecast was found
+    assert len(retrieved_forecasts) == 1
+
+    # Check that the retrieved forecast matches the inserted forecast
+    for i, value in enumerate(forecast_data):
+        assert retrieved_forecasts[0][i + 1] == value, f"Expected: {value}, Got: {retrieved_forecasts[0][i + 1]}"
+
 

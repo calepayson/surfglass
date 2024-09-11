@@ -95,6 +95,11 @@ INSERT INTO forecasts (
     wind_speed1000hpa)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
+GET_FORECASTS = """
+SELECT *
+FROM forecasts
+WHERE location_id = ? AND update_id = ?
+"""
 
 ###############################
 # DATABASE AND TABLE CREATION #
@@ -237,3 +242,7 @@ def add_forecast(
             )
         )
 
+def get_forecasts(connection, location_id, update_id):
+    """Get all forecasts for the provided location and update id"""
+    with connection:
+        return connection.execute(GET_FORECASTS, (location_id, update_id)).fetchall()
