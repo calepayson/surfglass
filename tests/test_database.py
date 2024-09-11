@@ -22,7 +22,7 @@ FROM sqlite_master
 WHERE type='table' AND name='forecasts';
 """
 FORECASTS_EXPECTED_COLUMNS = [
-    'id', 'location_id', 'time', 'tide', 'air_temp', 'cloud_cover', 
+    'id', 'location_id', 'update_id', 'time', 'tide', 'air_temp', 'cloud_cover', 
     'current_direction', 'current_speed', 'gust', 'swell_direction', 
     'swell_height', 'swell_period', 'secondary_swell_direction', 
     'secondary_swell_height', 'secondary_swell_period', 'visibility', 
@@ -98,6 +98,7 @@ def test_create_forecasts_table(tmp_path):
     db_file = tmp_path / "test.db"
     connection = Database.create_connection(str(db_file))
     Database.create_locations_table(connection)
+    Database.create_updates_table(connection)
     Database.create_forecasts_table(connection)
 
     # Check if the table exists
@@ -169,6 +170,7 @@ def test_get_all_locations(tmp_path):
         assert (location[1], location[2], location[3]) in LOCATIONS_TEST_DATA, f"({locations[1]}, {locations[2]}, {locations[3]}) not found in test data"
 
 def test_get_location_by_name(tmp_path):
+    """Test that a location can be retrieved by name"""
     db_file = tmp_path / "test.db"
     connection = Database.create_connection(str(db_file))
     Database.create_locations_table(connection)
@@ -188,6 +190,7 @@ def test_get_location_by_name(tmp_path):
     assert returned_location[0][3] == longitude, f"Expected longitude: {name}, Got: {returned_location[0][3]}"
 
 def test_delete_location_by_name(tmp_path):
+    """Test that a location can be deleted by name"""
     db_file = tmp_path / "test.db"
     connection = Database.create_connection(str(db_file))
     Database.create_locations_table(connection)
@@ -211,6 +214,7 @@ def test_delete_location_by_name(tmp_path):
         assert target_longitude != location[3], f"Deleted: {target_longitude} but found: {location[3]}"
 
 def test_update_location_by_name(tmp_path):
+    """Test that a location can be updated by name"""
     db_file = tmp_path / "test.db"
     connection = Database.create_connection(str(db_file))
     Database.create_locations_table(connection)
@@ -234,6 +238,7 @@ def test_update_location_by_name(tmp_path):
     assert location[3] == new_longitude, f"Expected: {new_longitude}, Got: {location[3]}"
 
 def test_add_update(tmp_path):
+    """Test that an update is successfully added"""
     db_file = tmp_path / "test.db"
     connection = Database.create_connection(str(db_file))
     Database.create_updates_table(connection)
@@ -254,4 +259,86 @@ def test_add_update(tmp_path):
 
     # Check that the location matches the input data
     assert update[0] == expected_time, f"Expected time: {expected_time}, Got: {update[0]}"
+
+def test_get_latest_update(tmp_path):
+    """Test that the latest update is successfully returned"""
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_updates_table(connection)
+
+    # Mock updates and add them to the database
+    for update in UPDATES_TEST_DATA:
+        time = update
+        Database.add_update(connection, time)
+
+    # Retrieve the latest update
+    expected_update = UPDATES_TEST_DATA[-1]
+    latest_update = Database.get_latest_update(connection)
+
+    # Check that an update was found
+    assert latest_update is not None
+
+    # Check that the update matches the expected
+    assert latest_update[0][1] == expected_update, f"Expected time: {expected_update}, Got {latest_update}"
+
+def test_add_forecast(tmp_path):
+    """Test that forecasts can be successfully added"""
+    db_file = tmp_path / "test.db"
+    connection = Database.create_connection(str(db_file))
+    Database.create_all_tables(connection)
+    
+    # Mock updates and add them to the database
+    for update in UPDATES_TEST_DATA:
+        time = update
+        Database.add_update(connection, time)
+
+    # Mock locations and add them to the database
+    for location in LOCATIONS_TEST_DATA:
+        name, latitude, longitude = location
+        Database.add_location(connection, name, latitude, longitude)
+
+    # Mock a forecast data entry
+    forecast_data = (
+        1,  # location_id
+        1,  # update_id
+        "2024-09-06 12:00:00",  # time
+        2.5,  # tide
+        18.0,  # air_temp
+        75.0,  # cloud_cover
+        135,  # current_direction
+        1.5,  # current_speed
+        25.0,  # gust
+        220,  # swell_direction
+        1.8,  # swell_height
+        12,  # swell_period
+        190,  # secondary_swell_direction
+        1.2,  # secondary_swell_height
+        10,  # secondary_swell_period
+        10.0,  # visibility
+        200,  # wave_direction
+        1.5,  # wave_height
+        8,  # wave_period
+        180,  # wind_wave_direction
+        1.0,  # wind_wave_height
+        7,  # wind_wave_period
+        180,  # wind_direction
+        170,  # wind_direction1000hpa
+        12.0,  # wind_speed
+        10.0  # wind_speed1000hpa
+    )
+
+    # Add the forecast to the database
+    Database.add_forecast(connection, *forecast_data)
+
+    # Retrieve the forecast
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM forecasts WHERE location_id = ? AND time = ?", (forecast_data[0], forecast_data[2]))
+    forecast = cursor.fetchone()
+
+    # Check that the forecast was found
+    assert forecast is not None
+
+    # Check that each value matches the input data
+    for i, value in enumerate(forecast_data):
+        assert forecast[i + 1] == value, f"Expected: {value}, Got: {forecast[i + 1]}"
 

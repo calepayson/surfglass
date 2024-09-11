@@ -36,6 +36,7 @@ CREATE_FORECASTS_TABLE = """
 CREATE TABLE IF NOT EXISTS forecasts (
     id INTEGER PRIMARY KEY,
     location_id INTEGER NOT NULL,
+    update_id INTEGER NOT NULL,
     time TEXT NOT NULL,
     tide REAL,
     air_temp REAL,
@@ -61,7 +62,38 @@ CREATE TABLE IF NOT EXISTS forecasts (
     wind_speed REAL,
     wind_speed1000hpa REAL,
     FOREIGN KEY (location_id) REFERENCES locations (id)
+    FOREIGN KEY (update_id) REFERENCES updates (id)
 );
+"""
+ADD_FORECAST = """
+INSERT INTO forecasts (
+    location_id,
+    update_id,
+    time,
+    tide,
+    air_temp,
+    cloud_cover,
+    current_direction,
+    current_speed,
+    gust,
+    swell_direction,
+    swell_height,
+    swell_period,
+    secondary_swell_direction,
+    secondary_swell_height,
+    secondary_swell_period,
+    visibility,
+    wave_direction,
+    wave_height,
+    wave_period,
+    wind_wave_direction,
+    wind_wave_height,
+    wind_wave_period,
+    wind_direction,
+    wind_direction1000hpa,
+    wind_speed,
+    wind_speed1000hpa)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
 
 ###############################
@@ -132,3 +164,76 @@ def add_update(connection, time):
     """Add an update to the updates table"""
     with connection:
         connection.execute(ADD_UPDATE, (time,))
+
+def get_latest_update(connection):
+    """Get the latest update"""
+    with connection:
+        return connection.execute(GET_LATEST_UPDATE).fetchall()
+
+#######################
+# FORECAST OPERATIONS #
+#######################
+
+def add_forecast(
+    connection,
+    location_id,
+    update_id,
+    time,
+    tide,
+    air_temp,
+    cloud_cover,
+    current_direction,
+    current_speed,
+    gust,
+    swell_direction,
+    swell_height,
+    swell_period,
+    secondary_swell_direction,
+    secondary_swell_height,
+    secondary_swell_period,
+    visibility,
+    wave_direction,
+    wave_height,
+    wave_period,
+    wind_wave_direction,
+    wind_wave_height,
+    wind_wave_period,
+    wind_direction,
+    wind_direction1000hpa,
+    wind_speed,
+    wind_speed1000hpa
+):
+    """Add a forecast to the forecasts table"""
+    with connection:
+        connection.execute(
+            ADD_FORECAST,
+            (
+                location_id,
+                update_id,
+                time,
+                tide,
+                air_temp,
+                cloud_cover,
+                current_direction,
+                current_speed,
+                gust,
+                swell_direction,
+                swell_height,
+                swell_period,
+                secondary_swell_direction,
+                secondary_swell_height,
+                secondary_swell_period,
+                visibility,
+                wave_direction,
+                wave_height,
+                wave_period,
+                wind_wave_direction,
+                wind_wave_height,
+                wind_wave_period,
+                wind_direction,
+                wind_direction1000hpa,
+                wind_speed,
+                wind_speed1000hpa,
+            )
+        )
+
