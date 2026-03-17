@@ -40,3 +40,14 @@ and branches.
 Pull requests should merge into the dev branch (not main). This way main should
 always be functional and we can revert back to it in the case of some really
 catastrophic mistake.
+
+### Dependency Management
+
+We use uv to track the project dependencies. Make sure uv is installed on your
+system ([instructions here]()). Then run:
+
+```bash
+uv sync
+```
+
+This will sync your virtual environment with the one saved on the branch.
