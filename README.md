@@ -34,3 +34,9 @@ git checkout <branch-name>
 If you have issues, walk through them with an LLM before you just start merging
 everything. If you're using an LLM, make sure it's not going crazy with merges
 and branches.
+
+### Pull Requests
+
+Pull requests should merge into the dev branch (not main). This way main should
+always be functional and we can revert back to it in the case of some really
+catastrophic mistake.
