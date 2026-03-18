@@ -1,7 +1,11 @@
 ---
-icon: lucide/rocket
+icon: lucide/house
 ---
 
-# Homebase
+# Welcome
 
-Welcome to the surf glass documentation site.
+Welcome to the Surfglass documentation site.
+
+## Getting Started
+
+Check out [Developer Workflow](devflow.md) guide.
