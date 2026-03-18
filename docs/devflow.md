@@ -29,7 +29,7 @@ merge it into your current branch, and resolve any merge conflicts.
 git checkout dev
 git pull
 git checkout <feature-branch>
-git merge main
+git merge dev
 ```
 
 After merge conflicts have been resolved, push it to the github repository.
