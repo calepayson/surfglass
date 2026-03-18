@@ -3,51 +3,80 @@
 Your best wave doesn't have to be a memory. Browse and buy surf photos from 
 local photographers.
 
-## Contributing
+## Quick Start
 
-### Getting Started
-
-- If you're new to git or it doesn't feel intuitive, read chapters 1-3 of
-[ProGit](https://git-scm.com/book/en/v2). You can breaze through it in a few
-hours and it'll lay a foundation that will make git intuitive.
-- Clone the repository locally.
-- You're good to go! (For now)...
-
-### On Issues
-
-We will be tracking everything through github issues. If you want to work on a
-bug, a feature, documentation, etc. the first step is to find or create an
-associated issue on github.
-
-Every issue should be associated with a branch. The easiest way to do this is
-by navigating to the issue and, in the right bar under 'Development', clicking
-'create a branch'. Obviously don't do this if there is already a branch
-associated with it.
-
-To work on an issue switch to the relevant branch on your local machine. The
-typical workflow is:
+Ensure you have the necessary programs installed:
 ```bash
-git fetch origin
-git checkout <branch-name>
+gh --version
+uv --version
+python --version
 ```
 
-If you have issues, walk through them with an LLM before you just start merging
-everything. If you're using an LLM, make sure it's not going crazy with merges
-and branches.
+Clone the repository, download the necessary packages, and serve the
+documentation site locally.
+```bash
+gh repo clone calepayson/surfglass
+uv sync
+uv run zensical serve
+```
 
-### Pull Requests
+Then click [here](http://localhost:8000/) to open the documentation site in
+your browser.
 
-Pull requests should merge into the dev branch (not main). This way main should
-always be functional and we can revert back to it in the case of some really
-catastrophic mistake.
+## Required and Recommended Programs
 
-### Dependency Management
+- [GitHub CLI](https://cli.github.com/) - Recommended - Abstracts a lot of
+github-specific rigamarole.
+- [uv](https://docs.astral.sh/uv/) - Required - A Python package and project
+manager. Makes version control easy.
+- [Python](https://www.python.org/doc/) - Required - The bare minimum right
+here.
 
-We use uv to track the project dependencies. Make sure uv is installed on your
-system ([instructions here]()). Then run:
+## Getting Started
 
+To get up and running quick, follow the Quick Start guide above. Here we go
+into a bit more details.
+
+As in the quick start guide, make sure you have the necessary programs
+installed:
+```bash
+gh --version
+uv --version
+python --version
+```
+
+First we clone the repository onto our local filesystem. The easiest way is
+with the GitHub CLI. From the command line, navigate to where you want to
+download the directory. For example I want it to be at `projects/surfglass` so
+I navigate to `projects`. Then run:
+```bash
+gh repo clone calepayson/surfglass
+```
+
+Next we have to set up our package manager. This will make sure that every
+contributor is using the same package versions. Without this versions can get
+all out of wack and cause major headaches. We'll be using uv so make sure you
+have it installed on your machine then run:
 ```bash
 uv sync
 ```
 
-This will sync your virtual environment with the one saved on the branch.
+This will check if there's a virtual environment, set one up if there isn't,
+and then download any missing packages (or switch to the required versions).
+
+Finally we want to get the docsite up and running. The docsite is where all our
+documentation goes and is the first place you should check if you have
+questions. To do this run:
+```bash
+uv run zensical serve
+```
+
+Then click [here](https://localhost:8000)
+
+If you're curious, let's break down that command. Uv is our package manager.
+When we say `uv run` we're saying "Run the next command in our virtual
+environment". The cool thing about uv is that you don't even have to activate
+the virtual environment! The next command is `zensical serve`. This starts the
+docsite and serves it locally on your machine (localhost:8000). If you change
+anything in the docs, it'll rebuild the docsite and refresh the page in your
+browser. Super useful!
